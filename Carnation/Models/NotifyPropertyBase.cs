@@ -4,7 +4,8 @@ using System.Runtime.CompilerServices;
 
 namespace Carnation
 {
-    public abstract class NotifyPropertyBase : INotifyPropertyChanged
+    public abstract class NotifyPropertyBase
+        : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

@@ -10,7 +10,8 @@ using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace Carnation
 {
-    internal class ActiveWindowTracker : NotifyPropertyBase, IVsRunningDocTableEvents, IDisposable
+    internal class ActiveWindowTracker
+        : NotifyPropertyBase, IVsRunningDocTableEvents, IDisposable
     {
         private DispatcherTimer _typingTimer;
         private readonly IVsRunningDocumentTable _runningDocumentTable;
@@ -43,7 +44,9 @@ namespace Carnation
             _runningDocumentTable.AdviseRunningDocTableEvents(this, out _runningDocumentTableCookie);
         }
 
-        public int OnBeforeDocumentWindowShow(uint docCookie, int firstShow, IVsWindowFrame vsWindowFrame)
+        public int OnBeforeDocumentWindowShow(uint docCookie,
+                                              int firstShow,
+                                              IVsWindowFrame vsWindowFrame)
         {
             if (firstShow != 0)
             {

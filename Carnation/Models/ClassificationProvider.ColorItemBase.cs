@@ -3,9 +3,10 @@ using System.Windows.Media;
 
 namespace Carnation
 {
-    internal partial class ClassificationProvider
+    internal sealed partial class ClassificationProvider
     {
-        internal abstract class ColorItemBase : NotifyPropertyBase
+        internal abstract class ColorItemBase
+            : NotifyPropertyBase
         {
             private uint _foregroundColorRef;
             public uint ForegroundColorRef

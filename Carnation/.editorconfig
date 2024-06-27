@@ -1,0 +1,10 @@
+
+[*.{cs,vb}]
+# IDE0130: Namespace does not match folder structure
+dotnet_style_namespace_match_folder = false
+dotnet_diagnostic.IDE0130.severity = none
+resharper_check_namespace_highlighting = none
+
+# CA1034: Nested types should not be visible
+dotnet_diagnostic.CA1034.severity = none
+
