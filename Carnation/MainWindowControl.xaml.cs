@@ -10,7 +10,8 @@ namespace Carnation
     /// <summary>
     /// Interaction logic for MainWindowControl.
     /// </summary>
-    public partial class MainWindowControl : UserControl, IDisposable
+    public partial class MainWindowControl
+        : UserControl, IDisposable
     {
         private ActiveWindowTracker _activeWindowTracker;
         private readonly MainWindowControlViewModel _viewModel;
@@ -20,20 +21,17 @@ namespace Carnation
         /// </summary>
         public MainWindowControl()
         {
-            DataContext = _viewModel = new MainWindowControlViewModel();
+            DataContext = _viewModel = new();
             InitializeComponent();
 
-            _activeWindowTracker = new ActiveWindowTracker();
+            _activeWindowTracker = new();
             _activeWindowTracker.PropertyChanged += ActiveWindowPropertyChanged;
 
             var editorFormatMapService = VSServiceHelpers.GetMefExport<IEditorFormatMapService>();
             var editorFormatMap = editorFormatMapService.GetEditorFormatMap("text");
-            editorFormatMap.FormatMappingChanged += (object s, FormatItemsEventArgs e) => UpdateClassifications(e.ChangedItems);
-
-            void UpdateClassifications(ReadOnlyCollection<string> definitionNames)
-            {
-                _viewModel.OnThemeChanged(definitionNames.ToLookup(name => name));
-            }
+            editorFormatMap.FormatMappingChanged += (_, e) => UpdateClassifications(e.ChangedItems);
+            return;
+            void UpdateClassifications(ReadOnlyCollection<string> definitionNames) => _viewModel.OnThemeChanged(definitionNames.ToLookup(name => name));
         }
 
         private void ActiveWindowPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

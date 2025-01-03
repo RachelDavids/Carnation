@@ -160,7 +160,7 @@ namespace Carnation
                     return;
                 }
 
-                var contrast = ColorHelpers.GetContrast(Foreground, Background);
+                var contrast = Foreground.GetContrast(Background);
                 ContrastRatio = contrast;
             }
         }

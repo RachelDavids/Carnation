@@ -3,51 +3,35 @@ using System.Windows.Input;
 
 namespace Carnation
 {
-    internal class RelayCommand : ICommand
+    internal class RelayCommand(Action commandAction, Func<bool> canExecute = null)
+        : ICommand
     {
-        private readonly Action _commandAction;
-        private readonly Func<bool> _canExecute;
-
         public event EventHandler CanExecuteChanged;
-
-        public RelayCommand(Action commandAction, Func<bool> canExecute = null)
-        {
-            _commandAction = commandAction;
-            _canExecute = canExecute;
-        }
 
         public bool CanExecute(object parameter)
         {
-            return _canExecute is null || _canExecute.Invoke();
+            return canExecute?.Invoke() != false;
         }
 
         public void Execute(object parameter)
         {
-            _commandAction.Invoke();
+            commandAction.Invoke();
         }
     }
 
-    internal class RelayCommand<T> : ICommand
+    internal class RelayCommand<T>(Action<T> commandAction, Func<T, bool> canExecute = null)
+        : ICommand
     {
-        private readonly Action<T> _commandAction;
-        private readonly Func<T, bool> _canExecute;
-
         public event EventHandler CanExecuteChanged;
-
-        public RelayCommand(Action<T> commandAction, Func<T, bool> canExecute = null)
-        {
-            _commandAction = commandAction;
-            _canExecute = canExecute;
-        }
 
         public bool CanExecute(object parameter)
         {
-            return _canExecute is null || _canExecute.Invoke((T)parameter);
+            return canExecute?.Invoke((T)parameter) != false;
         }
 
         public void Execute(object parameter)
         {
-            _commandAction.Invoke((T)parameter);
+            commandAction.Invoke((T)parameter);
         }
     }
 }

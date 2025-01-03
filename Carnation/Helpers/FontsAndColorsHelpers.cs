@@ -13,11 +13,11 @@ namespace Carnation
 {
     internal static class FontsAndColorsHelper
     {
-        private static readonly Guid TextEditorCategory = new Guid("A27B4E24-A735-4D1D-B8E7-9716E1E3D8E0");
-        private static readonly Guid TextEditorLanguageServiceCategory = new Guid("E0187991-B458-4F7E-8CA9-42C9A573B56C");
-        private static readonly Guid TextEditorMEFItemsCategory = new Guid("75A05685-00A8-4DED-BAE5-E7A50BFA929A");
-        private static readonly Guid TextEditorManagerCategory = new Guid("58E96763-1D3B-4E05-B6BA-FF7115FD0B7B");
-        private static readonly Guid TextEditorMarkerCategory = new Guid("FF349800-EA43-46C1-8C98-878E78F46501");
+        private static readonly Guid TextEditorCategory = new("A27B4E24-A735-4D1D-B8E7-9716E1E3D8E0");
+        private static readonly Guid TextEditorLanguageServiceCategory = new("E0187991-B458-4F7E-8CA9-42C9A573B56C");
+        private static readonly Guid TextEditorMEFItemsCategory = new("75A05685-00A8-4DED-BAE5-E7A50BFA929A");
+        private static readonly Guid TextEditorManagerCategory = new("58E96763-1D3B-4E05-B6BA-FF7115FD0B7B");
+        private static readonly Guid TextEditorMarkerCategory = new("FF349800-EA43-46C1-8C98-878E78F46501");
 
         internal static readonly (FontFamily FontFamily, double FontSize) DefaultFontInfo = (new FontFamily("Consolas"), 13.0);
         private static readonly (Color Foreground, Color Background) DefaultTextColors = (Colors.Black, Colors.White);
@@ -234,7 +234,6 @@ namespace Carnation
             ThreadHelper.ThrowIfNotOnUIThread();
 
             var fontAndColorUtilities = (IVsFontAndColorUtilities)s_fontsAndColorStorage;
-
             if (fontAndColorUtilities.GetColorType(colorRef, out var colorType) != VSConstants.S_OK)
             {
                 return null;
@@ -242,49 +241,43 @@ namespace Carnation
 
             uint? win32Color = null;
 
-            if (colorType == (int)__VSCOLORTYPE.CT_INVALID)
+            switch (colorType)
             {
-                return null;
-            }
-            else if (colorType == (int)__VSCOLORTYPE.CT_AUTOMATIC)
-            {
-                return null;
-            }
-            else if (colorType == (int)__VSCOLORTYPE.CT_RAW)
-            {
-                win32Color = colorRef;
-            }
-            else if (colorType == (int)__VSCOLORTYPE.CT_COLORINDEX)
-            {
-                var encodedIndex = new COLORINDEX[1];
-                if (fontAndColorUtilities.GetEncodedIndex(colorRef, encodedIndex) == VSConstants.S_OK &&
-                    fontAndColorUtilities.GetRGBOfIndex(encodedIndex[0], out var decoded) == VSConstants.S_OK)
-                {
-                    if (encodedIndex[0] is COLORINDEX.CI_SYSTEXT_BK or
-                        COLORINDEX.CI_SYSTEXT_FG)
+                case (int)__VSCOLORTYPE.CT_INVALID:
+                    return null;
+                case (int)__VSCOLORTYPE.CT_AUTOMATIC:
+                    return null;
+                case (int)__VSCOLORTYPE.CT_RAW:
+                    win32Color = colorRef;
+                    break;
+                case (int)__VSCOLORTYPE.CT_COLORINDEX:
+                    var encodedIndex = new COLORINDEX[1];
+                    if (fontAndColorUtilities.GetEncodedIndex(colorRef, encodedIndex) == VSConstants.S_OK &&
+                        fontAndColorUtilities.GetRGBOfIndex(encodedIndex[0], out var decoded) == VSConstants.S_OK)
                     {
-                        return null;
+                        if (encodedIndex[0] is COLORINDEX.CI_SYSTEXT_BK or
+                            COLORINDEX.CI_SYSTEXT_FG)
+                        {
+                            return null;
+                        }
+                        win32Color = encodedIndex[0] == COLORINDEX.CI_USERTEXT_BK
+                            ? decoded & 0x00ffffff
+                            : decoded | 0xff000000;
                     }
-
-                    win32Color = encodedIndex[0] == COLORINDEX.CI_USERTEXT_BK
-                        ? decoded & 0x00ffffff
-                        : decoded | 0xff000000;
-                }
-            }
-            else if (colorType == (int)__VSCOLORTYPE.CT_SYSCOLOR)
-            {
-                if (fontAndColorUtilities.GetEncodedSysColor(colorRef, out var sysColor) == VSConstants.S_OK)
-                {
-                    win32Color = (uint)sysColor;
-                }
-            }
-            else if (colorType == (int)__VSCOLORTYPE.CT_VSCOLOR)
-            {
-                if (fontAndColorUtilities.GetEncodedVSColor(colorRef, out var vsSysColor) == VSConstants.S_OK &&
-                    s_vsUIShell2.GetVSSysColorEx(vsSysColor, out var rgbColor) == VSConstants.S_OK)
-                {
-                    win32Color = rgbColor;
-                }
+                    break;
+                case (int)__VSCOLORTYPE.CT_SYSCOLOR:
+                    if (fontAndColorUtilities.GetEncodedSysColor(colorRef, out var sysColor) == VSConstants.S_OK)
+                    {
+                        win32Color = (uint)sysColor;
+                    }
+                    break;
+                case (int)__VSCOLORTYPE.CT_VSCOLOR:
+                    if (fontAndColorUtilities.GetEncodedVSColor(colorRef, out var vsSysColor) == VSConstants.S_OK &&
+                        s_vsUIShell2.GetVSSysColorEx(vsSysColor, out var rgbColor) == VSConstants.S_OK)
+                    {
+                        win32Color = rgbColor;
+                    }
+                    break;
             }
 
             return win32Color.HasValue
@@ -361,10 +354,7 @@ namespace Carnation
                 ? InvalidColorRef
                 : ToWin32Color(color);
 
-            static uint ToWin32Color(Color color)
-            {
-                return (uint)(color.R | (color.G << 8) | (color.B << 16));
-            }
+            static uint ToWin32Color(Color color) => (uint)(color.R | (color.G << 8) | (color.B << 16));
         }
 
         internal static void RefreshClassificationItem(ClassificationGridItem item, AllColorableItemInfo allColorableItemInfo)
